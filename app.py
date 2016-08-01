@@ -10,7 +10,7 @@ db.init_app(app)
 @app.route('/')
 def home():
 	pass
-
+#create
 @app.route('/addcustomer', methods=['POST','GET'])
 def addcustomer():
 	if request.method =='POST':
@@ -75,6 +75,7 @@ def add_detail():
 		
 		
 		return 'congratulation, successful input data'		
+
 def dateValidate(birth_date):
 	#default format
 	formatting = '%d-%m-%Y'
@@ -84,6 +85,57 @@ def dateValidate(birth_date):
 		return True
 	except ValueError:
 		return False
+#read
+@app.route('/find', methods=['POST','GET'])
+def search():
+
+	if request.method == 'POST':
+		search = request.form['search']
+		cari = request.form['submit']
+		find(search, cari)
+		errors = []
+		if not find(search, cari):
+			errors.append('search not found, Try again')
+		if errors:
+			for err in errors:
+				return err
+
+		return 'congratulation'
 	
+def find(search, cari):
+
+	if cari =='findfirst':
+		first = Customer.query.filter_by(name=search).first()
+		if not first:
+			return False
+		return True
+	elif cari =='findall':
+		findall = Customer.query.filter_by(name=search).all()
+		if not findall:
+			return False
+		return True
+	else:
+		return False
+
+#update
+@app.route('/update/<int:id>',methods=['POST','GET'])
+def update(id):
+	if request.method == 'POST':
+		new_job = request.form['new_job']
+		job = Detail.query.get(id)
+		job.job = new_job
+		db.session.add(job)
+		db.session.commit()
+
+		return 'update successfully'
+
+#delete
+@app.route('/delete/<int:id>')
+def delete(id):
+	customer = Customer.query.get(id)
+	db.session.delete(customer)
+	db.session.commit()
+
+	return 'Delete successfully'
 if __name__=='__main__':
 	app.run(debug=True)
